@@ -7,7 +7,7 @@ from .user import UserSchema
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     post = db.Column(db.String(), nullable=False)
-    user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __str__(self):
         return self.id
@@ -19,7 +19,7 @@ def check_word_count(content):
 
 class PostSchema(ma.Schema):
     post = fields.Str(required=True, validate=check_word_count)
-    user = fields.Nested(UserSchema)
+    user_id = fields.Nested(UserSchema)
 
 post_schema = PostSchema()
 posts_schema = PostSchema(many=True)
