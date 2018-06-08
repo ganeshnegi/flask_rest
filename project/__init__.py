@@ -13,5 +13,9 @@ migrate = Migrate(app, db)
 ma = Marshmallow(app)
 
 from .models import user, post
+
 from .api.user import user_blueprint
+from .api.post import post_blueprint
+
 app.register_blueprint(user_blueprint)
+app.register_blueprint(post_blueprint)
