@@ -55,6 +55,7 @@ class SingleUser(Resource):
             return user.errors, 400
 
         user_data = User(**input)
+        user_data.generate_password_hash(input['password'])
         db.session.add(user_data)
         db.session.commit()
         res = user_schema.dump(User.query.get(user_data.id))

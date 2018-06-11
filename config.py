@@ -7,3 +7,5 @@ class Config:
 
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 	DEBUG = True
+
+	JWT_SECRET_KEY = 'jwt-secret-key'

@@ -8,15 +8,18 @@ class User(db.Model):
     email = db.Column(db.String(50), nullable=False, unique=True)
     first_name = db.Column(db.String(20))
     last_name = db.Column(db.String(20))
-    # password = db.Column(db.String(50))
+    password = db.Column(db.String(50), nullable=False)
 
     def __str__(self):
         return self.email
 
+    def generate_password_hash(self, password):
+        self.password = password + "hashed"
 
-def email_validate(email):
-    if email.split('@')[1].startswith('mailinator'):
-        raise ValidationError('email not acceptable')
+
+def check_password_length(password):
+    if len(password) < 6:
+        raise ValidationError('password should have minimum 8 characters')
 
 
 class UserSchema(ma.Schema):
@@ -24,6 +27,7 @@ class UserSchema(ma.Schema):
     email=fields.Email(required=True)
     first_name = fields.String()
     last_name = fields.String()
+    password = fields.String(load_only=True, validate=check_password_length)
 
 
     @validates('email')
