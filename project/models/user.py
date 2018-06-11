@@ -68,3 +68,18 @@ class UserSchema(ma.Schema):
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
+
+
+class BlacklistedToken(db.Model):
+    """ store blacklisted jwt """
+    id = db.Column(db.Integer, primary_key=True)
+    jwt = db.Column(db.String(254))
+
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @classmethod
+    def is_jwt_blacklisted(cls, jwt):
+        query = cls.query.filter_by(jwt=jwt).first()
+        return bool(query)
