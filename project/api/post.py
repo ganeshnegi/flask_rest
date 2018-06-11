@@ -14,8 +14,19 @@ class PostList(Resource):
         print(data)
         return data.data
 
+class SinglePost(Resource):
+    def get(self, post_id):
+        post = Post.query.get_or_404(post_id)
+        post_data = post_schema.dump(post)
+        return post_data.data, 200
+
+
 post_blueprint = Blueprint('post', __name__)
 
-api = Api(post_blueprint, '/post')
+api = Api(post_blueprint, '/blog')
 api.add_resource(PostList, '/posts')
+api.add_resource(SinglePost, 
+        '/post/<int:post_id>',
+        '/post'
+    )
 

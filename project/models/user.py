@@ -8,7 +8,6 @@ class User(db.Model):
     email = db.Column(db.String(50), nullable=False, unique=True)
     first_name = db.Column(db.String(20))
     last_name = db.Column(db.String(20))
-    posts = db.relationship('Post', backref='user')
     # password = db.Column(db.String(50))
 
     def __str__(self):
