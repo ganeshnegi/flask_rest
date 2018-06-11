@@ -3,9 +3,40 @@ from flask_restful import Resource, Api
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
+from flask_jwt_extended import create_access_token, create_refresh_token
+
 from project import app, db
 from project.models.user import users_schema, User, user_schema
 
+
+class RegisterUser(Resource):
+    def post(self):
+        input = request.get_json(force=True)
+
+        # try:
+        #     user = user_schema.load(input)
+        # except Exception as e:
+        #     return e.messages, 400
+
+        user = user_schema.load(input)
+        if user.errors:
+            return user.errors, 400
+
+        if User.find_by_email(email):
+            return {'message':'email already registered'}
+
+        try:
+            new_user = User(**input)
+            new_user.set_password(input['password'])
+            new_user.save_to_db()
+            access_token = create_access_token(identity=email)
+            refresh_token = create_refresh_token(identity = email)
+            return {
+                'access_token':access_token,
+                'refresh_token':refresh_token
+                }, 201
+        except:
+            return {'message':'something went wrong'}, 500
 
 class UserList(Resource):
     """
@@ -42,25 +73,6 @@ class SingleUser(Resource):
             resp.status_code = 400
             return resp
 
-    def post(self):
-        input = request.get_json(force=True)
-
-        # try:
-        #     user = user_schema.load(input)
-        # except Exception as e:
-        #     return e.messages, 400
-
-        user = user_schema.load(input)
-        if user.errors:
-            return user.errors, 400
-
-        user_data = User(**input)
-        user_data.generate_password_hash(input['password'])
-        db.session.add(user_data)
-        db.session.commit()
-        res = user_schema.dump(User.query.get(user_data.id))
-        return res, 201
-
     def put(self, user_id):
         user = self.validate_id(user_id)
         input_data = request.get_json()
@@ -96,8 +108,8 @@ class SingleUser(Resource):
 user_blueprint = Blueprint('user', __name__)
 api = Api(user_blueprint, prefix = '/auth')
 
+api.add_resource(RegisterUser, '/register')
 api.add_resource(UserList, '/users')
 api.add_resource(SingleUser, 
-        '/user/<int:user_id>', #GET, PUT, DELETE
-        '/user' #POSTS
+        '/user/<int:user_id>' #GET, PUT, DELETE
     )

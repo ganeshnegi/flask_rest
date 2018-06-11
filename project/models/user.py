@@ -3,6 +3,8 @@ from project import ma
 from flask import jsonify
 from marshmallow import fields, post_load, ValidationError, validates
 
+from werkzeug.security import generate_password_hash, check_password_hash
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), nullable=False, unique=True)
@@ -13,8 +15,19 @@ class User(db.Model):
     def __str__(self):
         return self.email
 
-    def generate_password_hash(self, password):
-        self.password = password + "hashed"
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
+    @classmethod
+    def find_by_email(cls, email):
+        return cls.query.filter_by(email=email).first()
 
 
 def check_password_length(password):

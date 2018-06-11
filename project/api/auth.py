@@ -1,4 +1,4 @@
-from flask_jwt_extended import create_access_token, get_jwt_identity
+from flask_jwt_extended import create_access_token, get_jwt_identity, create_refresh_token
 from project import app
 from flask import request, jsonify
 
@@ -20,10 +20,19 @@ def login():
     if not password:
         return jsonify({'error':'password missing'}), 400
 
-    user = User.query.filter_by(email=email).first()
+    user = User.find_by_email(email)
 
     if not user:
         return jsonify({'error':'user not exist with this email'}), 400
 
+    authenticated = user.check_password(password)
+
+    if not authenticated:
+        return jsonify({'error':'invalid username/password'}), 400
+
     access_token = create_access_token(identity=email)
-    return jsonify({'access_token':access_token}), 200
+    refresh_token = create_refresh_token(identity = email)
+    return jsonify({
+        'access_token':access_token,
+        'refresh_token':refresh_token
+        }), 200

@@ -2,12 +2,14 @@ from flask import Flask, Blueprint, request, jsonify, abort
 from flask_restful import Resource, Api
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
+from flask_jwt_extended import jwt_required
 
 from project import app, db
 from project.models.post import post_schema, Post, posts_schema
 
 
 class PostList(Resource):
+    @jwt_required
     def get(self):
         posts = Post.query.all()
         data = posts_schema.dump(posts)
