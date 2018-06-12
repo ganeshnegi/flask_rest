@@ -16,22 +16,19 @@ def login():
 
     email = login_data.get('email')
     password = login_data.get('password')
-    
-    if not email:
-        return jsonify({'error':'email missing'}), 400
 
-    if not password:
-        return jsonify({'error':'password missing'}), 400
+    if any([email, password]):
+        return jsonify({'message':'invalid credentials'}), 400
 
     user = User.find_by_email(email)
 
     if not user:
-        return jsonify({'error':'user not exist with this email'}), 400
+        return jsonify({'message':'user not exist with this email'}), 400
 
     authenticated = user.check_password(password)
 
     if not authenticated:
-        return jsonify({'error':'invalid username/password'}), 400
+        return jsonify({'message':'invalid username/password'}), 400
 
     access_token = create_access_token(identity=email)
     refresh_token = create_refresh_token(identity = email)
@@ -46,7 +43,7 @@ class RevokeAccessToken(Resource):
     # @jwt_required
     def post(self):
         import pdb;pdb.set_trace()
-        jwt = get_raw_jwt()['jwt']
+        jwt = get_raw_jwt()['jwt']  #jti
         pass
 
 

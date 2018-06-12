@@ -83,3 +83,4 @@ class BlacklistedToken(db.Model):
     def is_jwt_blacklisted(cls, jwt):
         query = cls.query.filter_by(jwt=jwt).first()
         return bool(query)
+
