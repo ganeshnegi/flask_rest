@@ -18,12 +18,12 @@ from .models import user, post
 
 from .api.user import user_blueprint
 from .api.post import post_blueprint
-from .api.auth import *
+import project.api.auth
 
 app.register_blueprint(user_blueprint)
 app.register_blueprint(post_blueprint)
 
 @jwt.token_in_blacklist_loader
 def check_if_token_in_blacklist(decrypted_token):
-    jwt = decrypted_token['jwt']
-    return user.BlacklistedToken.is_jwt_blacklisted(jwt)
+    jti = decrypted_token['jti']
+    return user.BlacklistedToken.is_jti_blacklisted(jti)

@@ -13,7 +13,6 @@ class PostList(Resource):
     def get(self):
         posts = Post.query.all()
         data = posts_schema.dump(posts)
-        print(data)
         return data.data
 
 class SinglePost(Resource):

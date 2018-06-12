@@ -5,7 +5,7 @@ from flask_restful import Resource, Api
 from flask import request, jsonify
 
 from project import app
-from project.models.user import User
+from project.models.user import User, BlacklistedToken
 
 @app.route('/login', methods = ['POST'])
 def login():
@@ -16,19 +16,19 @@ def login():
 
     email = login_data.get('email')
     password = login_data.get('password')
-
-    if any([email, password]):
+    
+    if not all([email, password]):
         return jsonify({'message':'invalid credentials'}), 400
 
     user = User.find_by_email(email)
 
     if not user:
-        return jsonify({'message':'user not exist with this email'}), 400
+        return jsonify({'error':'user not exist with this email'}), 400
 
     authenticated = user.check_password(password)
 
     if not authenticated:
-        return jsonify({'message':'invalid username/password'}), 400
+        return jsonify({'error':'invalid username/password'}), 400
 
     access_token = create_access_token(identity=email)
     refresh_token = create_refresh_token(identity = email)
@@ -38,14 +38,19 @@ def login():
         }), 200
 
 
-class RevokeAccessToken(Resource):
+@app.route('/logout', methods=['DELETE'])
+@jwt_required
+def logout():
+    jti = get_raw_jwt()['jti']
+    blt = BlacklistedToken(jti=jti)
+    blt.add()
+    return jsonify({'message':'Access Token revoked'}), 204
 
-    # @jwt_required
-    def post(self):
-        import pdb;pdb.set_trace()
-        jwt = get_raw_jwt()['jwt']  #jti
-        pass
 
-
-api = Api(app)
-api.add_resource(RevokeAccessToken, '/logout')
+@app.route('/logout2', methods=['DELETE'])
+@jwt_refresh_token_required
+def logout2():
+    jti = get_raw_jwt()['jti']
+    blt = BlacklistedToken(jti=jti)
+    blt.add()
+    return jsonify({'message':'Refresh Token revoked'}), 204
