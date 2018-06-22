@@ -23,15 +23,15 @@ class RegisterUser(Resource):
         if user.errors:
             return user.errors, 400
 
-        if User.find_by_email(email):
+        if User.find_by_email(input['email']):
             return {'message':'email already registered'}
 
         try:
             new_user = User(**input)
             new_user.set_password(input['password'])
             new_user.save_to_db()
-            access_token = create_access_token(identity=email)
-            refresh_token = create_refresh_token(identity = email)
+            access_token = create_access_token(identity=new_user.email)
+            refresh_token = create_refresh_token(identity=new_user.email)
             return {
                 'access_token':access_token,
                 'refresh_token':refresh_token
